@@ -18,6 +18,13 @@ features = ['derive']
 package = 'parity-scale-codec'
 version = '1.0.0'
 
+[dependencies.evm]
+default-features = false
+git = 'https://github.com/paritytech/substrate.git'
+package = 'pallet-evm'
+rev = '3e651110aa06aa835790df63410a29676243fc54'
+version = '2.0.0'
+
 [dependencies.frame-executive]
 default-features = false
 git = 'https://github.com/paritytech/substrate.git'
@@ -164,6 +171,7 @@ std = [
     'aura/std',
     'balances/std',
     'codec/std',
+    'evm/std',
     'frame-executive/std',
     'frame-support/std',
     'grandpa/std',
@@ -190,7 +198,7 @@ std = [
 ]
 
 [package]
-authors = ['Anonymous']
+authors = ['Dan Forbes <dan@danforbes.dev>']
 edition = '2018'
 name = 'node-template-runtime'
 version = '2.0.0'
