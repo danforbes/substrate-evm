@@ -1,6 +1,6 @@
-use sp_core::{Pair, Public, sr25519};
+use sp_core::{H160, Pair, Public, sr25519, U256};
 use node_template_runtime::{
-	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig,
+	AccountId, AuraConfig, BalancesConfig, EVMAccount, EVMConfig, GenesisConfig, GrandpaConfig,
 	SudoConfig, IndicesConfig, SystemConfig, WASM_BINARY, Signature
 };
 use sp_consensus_aura::sr25519::{AuthorityId as AuraId};
@@ -138,6 +138,14 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 		}),
 		grandpa: Some(GrandpaConfig {
 			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
+		}),
+		evm: Some(EVMConfig {
+			accounts: vec![(
+				H160::zero(),
+				EVMAccount {
+					nonce: 0.into(),
+					balance: U256::MAX,
+				})],
 		}),
 	}
 }

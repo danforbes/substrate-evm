@@ -38,6 +38,7 @@ pub use frame_support::{
 	traits::Randomness,
 	weights::Weight,
 };
+pub use evm::Account as EVMAccount;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -269,7 +270,7 @@ construct_runtime!(
 		TransactionPayment: transaction_payment::{Module, Storage},
 		Sudo: sudo,
 		RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
-		EVM: evm::{Module, Call, Storage, Event},
+		EVM: evm::{Module, Config, Call, Storage, Event},
 	}
 );
 
