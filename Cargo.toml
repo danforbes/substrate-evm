@@ -32,6 +32,13 @@ version = '1.0.0'
 features = ['termination']
 version = '3.1.3'
 
+[dependencies.evm]
+default-features = false
+git = 'https://github.com/paritytech/substrate.git'
+package = 'pallet-evm'
+rev = '3e651110aa06aa835790df63410a29676243fc54'
+version = '2.0.0'
+
 [dependencies.futures01]
 package = 'futures'
 version = '0.1.29'
