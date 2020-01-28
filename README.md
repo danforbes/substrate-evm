@@ -1,102 +1,68 @@
-# Substrate Node Template
+# Substrate Node + EVM Pallet Template
 
-A new FRAME-based Substrate node, ready for hacking.
+A [FRAME](https://substrate.dev/docs/en/next/conceptual/runtime/frame)-based [Substrate](https://substrate.dev/en/) node with the [EVM pallet](https://substrate.dev/docs/en/next/conceptual/runtime/frame#evm), ready for hacking :rocket:
 
-## Build
+## Upstream
 
-Install Rust:
+This project was forked from the [Substrate Node Template](https://github.com/substrate-developer-hub/substrate-node-template) and the same instructions for [building](https://github.com/substrate-developer-hub/substrate-node-template#build) and [running](https://github.com/substrate-developer-hub/substrate-node-template#run) apply.
 
-```bash
-curl https://sh.rustup.rs -sSf | sh
+## Genesis Configuration
+
+The development [chain spec](https://github.com/danforbes/substrate-evm/blob/master/src/chain_spec.rs) included with this project defines a genesis block that has been pre-configured with an EVM account for [Alice](https://substrate.dev/docs/en/next/development/tools/subkey#well-known-keys). When [a development chain is started](https://github.com/substrate-developer-hub/substrate-node-template#run), Alice's EVM account ID is printed to the console (`EVM Account ID for Alice: 0x57d213d0927ccc7596044c6ba013dd05522aacba`). The [Polkadot UI](https://substrate.dev/docs/en/next/development/front-end/polkadot-js#polkadot-js-apps) can be used to see the details of Alice's EVM account. In order to view an EVM account, use the `Developer` tab of the Polkadot UI `Settings` app to define the EVM `Account` type:
+```
+{
+  ...
+  "Account": {
+    "nonce": "U256",
+    "balance": "U256"
+  }
+  ...
+}
 ```
 
-Initialize your Wasm Build environment:
+Once this type has been defined, use the `Chain State` app's `Storage` tab to query `evm > accounts` with Alice's EVM account ID (`0x57d213d0927ccc7596044c6ba013dd05522aacba`); the returned value should be: `{"nonce":0,"balance":"0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}`.
 
-```bash
-./scripts/init.sh
+## Contract Deployment & Usage
+
+Define a simple smart contract and use a tool like [the Remix web IDE](https://remix.ethereum.org/) to determine its bytecode:
+
+Contract:
+```
+pragma solidity ^0.6.0;
+
+contract HelloEvm {
+    uint public num = 42;
+    
+    function setNum(uint _num) external {
+        num = _num;
+    }
+}
 ```
 
-Build Wasm and native code:
-
-```bash
-cargo build --release
+Bytecode:
+```
+0x6080604052602a60005534801561001557600080fd5b5060c4806100246000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80634e70b1dc146037578063cd16ecbf146053575b600080fd5b603d607e565b6040518082815260200191505060405180910390f35b607c60048036036020811015606757600080fd5b81019080803590602001909291905050506084565b005b60005481565b806000819055505056fea2646970667358221220680058d8f10641b1dc0534843e3c071877d55adf9f39c4550a1358af8b13993464736f6c63430006000033
 ```
 
-## Run
-
-### Single Node Development Chain
-
-Purge any existing developer chain state:
-
-```bash
-./target/release/node-template purge-chain --dev
+Use the Polkadot UI `Extrinsics` app to deploy the contract from Alice's account (submit the extrinsic as a signed transaction) using `evm > create` with the following parameters:
+```
+init: <contract bytecode>
+value: 0
+gas_limit: 4294967295
+gas_price: 1
 ```
 
-Start a development chain with:
+Use the `Chain State` app to view Alice's [EVM account](https://github.com/danforbes/danforbes/blob/master/writings/eth-dev.md#Accounts) after submitting the extrinsic; notice that the account's `nonce` value has been incremented to `1` and its `balance` has decreased.
 
-```bash
-./target/release/node-template --dev
+Since Ethereum smart contract account IDs are deterministic, and since both Alice's nonce (`0`) and EVM account ID (`0x57d213d0927ccc7596044c6ba013dd05522aacba`) were well-known at contract-creation time, [it is trivial to calculate the account ID of the newly-created contract](https://ethereum.stackexchange.com/a/46960): `0x11650d764feb44f78810ef08700c2284f7e81dcb`. Use the `Chain State` app to view the contract's account, then query `evm > accountCodes` for both Alice's and the contract's account IDs; notice that Alice's account code is empty and the contract's is equal to the bytecode of the Solidity smart contract. Finally, query `evm > accountStorages` to view the value of the element in the contract's first storage slot (use the contract's account ID for the `H160` parameter and `0x0000000000000000000000000000000000000000000000000000000000000000` for the `H256` parameter); the value that is returned should be `0x000000000000000000000000000000000000000000000000000000000000002a`, which is equal to the `uint` value `42`.
+
+Now use the `Extrinsics` app to invoke `evm > call` and update the value of the element in the contract's first storage slot. Use a tool like Remix to calculate the value of the `input` parameter for whatever value you would like to update the storage element's value to; the provided `input` parameter will update it to `221`:
+```
+target: 0x11650d764feb44f78810ef08700c2284f7e81dcb
+input: 0xcd16ecbf00000000000000000000000000000000000000000000000000000000000000dd
+value: 0
+gas_limit: 4294967295
+gas_price: 1
 ```
 
-Detailed logs may be shown by running the node with the following environment variables set: `RUST_LOG=debug RUST_BACKTRACE=1 cargo run -- --dev`.
-
-### Multi-Node Local Testnet
-
-If you want to see the multi-node consensus algorithm in action locally, then you can create a local testnet with two validator nodes for Alice and Bob, who are the initial authorities of the genesis chain that have been endowed with testnet units.
-
-Optionally, give each node a name and expose them so they are listed on the Polkadot [telemetry site](https://telemetry.polkadot.io/#/Local%20Testnet).
-
-You'll need two terminal windows open.
-
-We'll start Alice's substrate node first on default TCP port 30333 with her chain database stored locally at `/tmp/alice`. The bootnode ID of her node is `QmRpheLN4JWdAnY7HGJfWFNbfkQCb6tFf4vvA6hgjMZKrR`, which is generated from the `--node-key` value that we specify below:
-
-```bash
-cargo run -- \
-  --base-path /tmp/alice \
-  --chain=local \
-  --alice \
-  --node-key 0000000000000000000000000000000000000000000000000000000000000001 \
-  --telemetry-url ws://telemetry.polkadot.io:1024 \
-  --validator
-```
-
-In the second terminal, we'll start Bob's substrate node on a different TCP port of 30334, and with his chain database stored locally at `/tmp/bob`. We'll specify a value for the `--bootnodes` option that will connect his node to Alice's bootnode ID on TCP port 30333:
-
-```bash
-cargo run -- \
-  --base-path /tmp/bob \
-  --bootnodes /ip4/127.0.0.1/tcp/30333/p2p/QmRpheLN4JWdAnY7HGJfWFNbfkQCb6tFf4vvA6hgjMZKrR \
-  --chain=local \
-  --bob \
-  --port 30334 \
-  --telemetry-url ws://telemetry.polkadot.io:1024 \
-  --validator
-```
-
-Additional CLI usage options are available and may be shown by running `cargo run -- --help`.
-
-## Advanced: Generate Your Own Substrate Node Template
-
-A substrate node template is always based on a certain version of Substrate. You can inspect it by
-opening [Cargo.toml](Cargo.toml) and see the template referred to a specific Substrate commit(
-`rev` field), branch, or version.
-
-You can generate your own Substrate node-template based on a particular Substrate
-version/commit by running following commands:
-
-```bash
-# git clone from the main Substrate repo
-git clone https://github.com/paritytech/substrate.git
-cd substrate
-
-# Switch to a particular branch or commit of the Substrate repo your node-template based on
-git checkout <branch/tag/sha1>
-
-# Run the helper script to generate a node template.
-# This script compiles Substrate and takes a while to complete. It takes a relative file path
-#   from the current dir. to output the compressed node template.
-.maintain/node-template-release.sh ../node-template.tar.gz
-```
-
-Noted though you will likely get faster and more thorough support if you stick with the releases
-provided in this repository.
+Use the `Chain State` app to view the updated value of the element in the contract's first storage slot as well as Alice's account, which should now have a `nonce` value of `2`.
