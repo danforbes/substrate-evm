@@ -1,0 +1,15 @@
+{
+  "APP_NAME": "substrate-front-end-tutorial",
+  "DEVELOPMENT_KEYRING": true,
+  "CUSTOM_TYPES": {
+    "Account": {
+      "nonce": "U256",
+      "balance": "U256"
+    },
+    "Log": {
+      "address": "H160",
+      "topics": "Vec<H256>",
+      "data": "Vec<u8>"
+    }
+  }
+}
