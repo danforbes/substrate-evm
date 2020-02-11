@@ -6,6 +6,16 @@
       "nonce": "U256",
       "balance": "U256"
     },
+    "AccountData": {
+      "free": "U256",
+      "reserved": "U256",
+      "misc_frozen": "U256",
+      "fee_frozen": "U256"
+    },
+    "ChangesTrieConfiguration": {
+      "digest_interval": "U32",
+      "digest_levels": "U32"
+    },
     "Log": {
       "address": "H160",
       "topics": "Vec<H256>",

@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Grid, Form, Input } from 'semantic-ui-react';
 
-import { useSubstrate, utils } from './substrate-lib';
+import { useSubstrate } from './substrate-lib';
 import { TxButton } from './substrate-lib/components';
 
 function Main (props) {
@@ -17,45 +17,23 @@ function Main (props) {
   const { bytecode, initialBalance, gasLimit, gasPrice } = formState;
   const onChange = (_, data) => setFormState(formState => ({ ...formState, [data.state]: data.value }));
 
-  const [createContractState, setContractState] = useReducer(updateContractState, { message: null, nonce: null, success: null });
-  function updateContractState (oldState, newState) {
-    const { message, nonce, success } = newState;
-    if (success) {
-      const address = utils.getContractAddress(utils.getEVMAccountID(keyring.decodeAddress(accountPair.address)), oldState.nonce);
-      return { message: `Contract ${address} created at block ${message.substring(message.lastIndexOf(' ') + 1)}`, nonce: null, success: null };
-    }
-
-    if (nonce !== undefined) {
-      return { ...newState, success: null };
-    }
-
-    return { message, nonce: oldState.nonce, success: null };
-  }
-
+  const [message, setMessage] = useState(null);
   useEffect(() => {
     const { code, message } = status;
     let unsubscribeAll = null;
     switch (code) {
-      case -1:
-        api.query.evm.accounts(utils.getEVMAccountID(keyring.decodeAddress(accountPair.address)), (account) => {
-          setContractState({ nonce: parseInt(account.nonce.toHex(), 16), message });
-        }).then((unsubscribe) => {
-          unsubscribeAll = unsubscribe;
-        }).catch(console.error);
-
-        return () => unsubscribeAll && unsubscribeAll();
       case 0: {
         if (!Array.isArray(status.events) || status.events.length < 1) {
           break;
         }
 
         const event = status.events[0].event;
-        const eventIdx = parseInt(event.index, 16);
-        switch (eventIdx) {
-          case 0:
-            setContractState({ success: true, message });
+        const eventName = event.meta.name.toString();
+        switch (eventName) {
+          case 'Created':
+            setMessage(`Contract ${event.data[0]} created at block ${message.substring(message.lastIndexOf(' ') + 1)}`);
             break;
-          case 1: {
+          case 'ExtrinsicFailed': {
             const errorData = event.data[0];
             if (!errorData.isModule) {
               break;
@@ -63,8 +41,8 @@ function Main (props) {
 
             api.rpc.state.getMetadata((metadata) => {
               const { index, error } = errorData.asModule;
-              const doc = metadata.metadata.asV10.modules[index].errors[error].documentation;
-              setContractState({ message: `Error creating transaction at block ${message.substring(message.lastIndexOf(' ') + 1)}: ${doc}` });
+              const doc = metadata.metadata.asV11.modules[index].errors[error].documentation;
+              setMessage(`Error creating transaction at block ${message.substring(message.lastIndexOf(' ') + 1)}: ${doc}`);
             }).then((unsubscribe) => {
               unsubscribeAll = unsubscribe;
             }).catch(console.error);
@@ -72,13 +50,13 @@ function Main (props) {
             return () => unsubscribeAll && unsubscribeAll();
           }
           default:
-            // uknown event
+            console.warn(`Unknown event: ${eventName}.`);
         }
 
         break;
       }
       default:
-        setContractState({ message });
+        setMessage(message);
     }
   }, [accountPair.address, api.query.evm, api.rpc.state, keyring, status]);
 
@@ -139,7 +117,7 @@ function Main (props) {
             }}
           />
         </Form.Field>
-        <div style={{ overflowWrap: 'break-word' }}>{createContractState.message}</div>
+        <div style={{ overflowWrap: 'break-word' }}>{message}</div>
       </Form>
     </Grid.Column>
   );

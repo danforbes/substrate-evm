@@ -1,8 +1,6 @@
 import { blake2AsHex } from '@polkadot/util-crypto';
 
 import BigJS from 'big.js';
-import keccak from 'keccak';
-import { encode } from 'rlp';
 import toFormat from 'toformat';
 
 const Big = toFormat(BigJS);
@@ -24,10 +22,6 @@ const utils = {
 
   getEVMAccountID: function (address) {
     return `0x${blake2AsHex(address, 256).substring(26)}`;
-  },
-
-  getContractAddress: function (sender, nonce) {
-    return `0x${keccak('keccak256').update(encode([sender, nonce])).digest('hex').substring(24)}`;
   }
 };
 
