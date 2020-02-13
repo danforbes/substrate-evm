@@ -25,3 +25,9 @@ start-ui:
 build : build-chain build-ui
 
 clean : clean-chain clean-ui
+
+podman-build :
+	podman build --tag subpi:latest ./rpi/
+
+pi-build : podman-build
+	./rpi/pi-build.sh
