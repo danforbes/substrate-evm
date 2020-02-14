@@ -7,8 +7,8 @@ switch (command) {
     const address = process.argv[4];
     const mapStorageSlot = slot.padStart(64, '0');
     const mapKey = address.substring(2).padStart(64, '0');
-    console.log(`ERC-20 balance for ${address} with balances at slot ${slot}...`);
-    console.log(`web3.utils.sha3(${mapKey.concat(mapStorageSlot)}): ${web3.utils.sha3(mapKey.concat(mapStorageSlot))}`);
+    const balanceStorageSlot = web3.utils.sha3('0x'.concat(mapKey.concat(mapStorageSlot)));
+    console.log(`Storage slot for balance of ${address} with balance map at slot ${slot}: ${balanceStorageSlot}`);
     break;
   default:
     console.log(`Unknown command: ${command}.`);
