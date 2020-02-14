@@ -2646,76 +2646,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "node-template"
-version = "2.0.0"
-dependencies = [
- "ctrlc",
- "futures 0.1.29",
- "futures 0.3.4",
- "log",
- "node-template-runtime",
- "pallet-evm",
- "parity-scale-codec",
- "parking_lot 0.9.0",
- "sc-basic-authorship",
- "sc-cli",
- "sc-client",
- "sc-consensus-aura",
- "sc-executor",
- "sc-finality-grandpa",
- "sc-network",
- "sc-service",
- "sc-transaction-pool",
- "sp-consensus",
- "sp-consensus-aura",
- "sp-core",
- "sp-finality-grandpa",
- "sp-inherents",
- "sp-io",
- "sp-runtime",
- "sp-transaction-pool",
- "structopt",
- "substrate-build-script-utils",
- "tokio 0.1.22",
- "trie-root 0.15.2",
- "vergen",
-]
-
-[[package]]
-name = "node-template-runtime"
-version = "2.0.0"
-dependencies = [
- "frame-executive",
- "frame-support",
- "frame-system",
- "pallet-aura",
- "pallet-balances",
- "pallet-evm",
- "pallet-grandpa",
- "pallet-indices",
- "pallet-randomness-collective-flip",
- "pallet-sudo",
- "pallet-timestamp",
- "pallet-transaction-payment",
- "parity-scale-codec",
- "safe-mix",
- "serde",
- "sp-api",
- "sp-block-builder",
- "sp-consensus-aura",
- "sp-core",
- "sp-inherents",
- "sp-io",
- "sp-offchain",
- "sp-runtime",
- "sp-session",
- "sp-std",
- "sp-transaction-pool",
- "sp-version",
- "substrate-wasm-builder-runner",
-]
-
-[[package]]
 name = "nodrop"
 version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5337,6 +5267,76 @@ dependencies = [
 name = "substrate-build-script-utils"
 version = "2.0.0"
 source = "git+https://github.com/paritytech/substrate.git#26a4b73931e636157a38a26a92f9103fe1b644c5"
+
+[[package]]
+name = "substrate-evm-runtime"
+version = "2.0.0"
+dependencies = [
+ "frame-executive",
+ "frame-support",
+ "frame-system",
+ "pallet-aura",
+ "pallet-balances",
+ "pallet-evm",
+ "pallet-grandpa",
+ "pallet-indices",
+ "pallet-randomness-collective-flip",
+ "pallet-sudo",
+ "pallet-timestamp",
+ "pallet-transaction-payment",
+ "parity-scale-codec",
+ "safe-mix",
+ "serde",
+ "sp-api",
+ "sp-block-builder",
+ "sp-consensus-aura",
+ "sp-core",
+ "sp-inherents",
+ "sp-io",
+ "sp-offchain",
+ "sp-runtime",
+ "sp-session",
+ "sp-std",
+ "sp-transaction-pool",
+ "sp-version",
+ "substrate-wasm-builder-runner",
+]
+
+[[package]]
+name = "substrate-evm-template"
+version = "2.0.0"
+dependencies = [
+ "ctrlc",
+ "futures 0.1.29",
+ "futures 0.3.4",
+ "log",
+ "pallet-evm",
+ "parity-scale-codec",
+ "parking_lot 0.9.0",
+ "sc-basic-authorship",
+ "sc-cli",
+ "sc-client",
+ "sc-consensus-aura",
+ "sc-executor",
+ "sc-finality-grandpa",
+ "sc-network",
+ "sc-service",
+ "sc-transaction-pool",
+ "sp-consensus",
+ "sp-consensus-aura",
+ "sp-core",
+ "sp-finality-grandpa",
+ "sp-inherents",
+ "sp-io",
+ "sp-runtime",
+ "sp-transaction-pool",
+ "structopt",
+ "substrate-build-script-utils",
+ "substrate-evm-runtime",
+ "tokio 0.1.22",
+ "trie-root 0.15.2",
+ "vergen",
+]
 
 [[package]]
 name = "substrate-wasm-builder-runner"

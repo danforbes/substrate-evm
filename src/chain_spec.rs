@@ -1,5 +1,5 @@
 use sp_core::{Blake2Hasher, Pair, Public, sr25519, U256};
-use node_template_runtime::{
+use substrate_evm_runtime::{
 	AccountId, AuraConfig, BalancesConfig, EVMAccount, EVMConfig, GenesisConfig, GrandpaConfig,
 	SudoConfig, IndicesConfig, SystemConfig, WASM_BINARY, Signature
 };

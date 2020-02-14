@@ -2,10 +2,10 @@
 panic = 'unwind'
 
 [package]
-authors = ['Anonymous']
+authors = ['Dan Forbes <dan@danforbes.dev>']
 build = 'build.rs'
 edition = '2018'
-name = 'node-template'
+name = 'substrate-evm-template'
 version = '2.0.0'
 
 [build-dependencies]
@@ -56,7 +56,7 @@ package = 'sp-finality-grandpa'
 branch = 'master'
 version = '2.0.0'
 
-[dependencies.node-template-runtime]
+[dependencies.substrate-evm-runtime]
 path = 'runtime'
 version = '2.0.0'
 
@@ -138,5 +138,5 @@ version = '2.0.0'
 members = ['runtime']
 
 [[bin]]
-name = 'node-template'
+name = 'substrate-evm'
 path = 'src/main.rs'
