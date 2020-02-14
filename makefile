@@ -5,13 +5,13 @@ build-chain : init-wasm
 	cargo build --release
 
 purge-chain :
-	./target/release/node-template purge-chain --dev
+	./target/release/substrate-evm purge-chain --dev
 
 clean-chain : purge-chain
 	rm -fr ./target
 
 start-chain :
-	./target/release/node-template --dev
+	./target/release/substrate-evm --dev
 
 build-ui :
 	cd ./ui && yarn
@@ -21,10 +21,6 @@ clean-ui :
 
 start-ui:
 	cd ui && yarn start
-
-build : build-chain build-ui
-
-clean : clean-chain clean-ui
 
 podman-build :
 	podman build --tag subpi:latest ./rpi/

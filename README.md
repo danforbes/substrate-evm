@@ -4,47 +4,49 @@ A [FRAME](https://substrate.dev/docs/en/next/conceptual/runtime/frame)-based [Su
 
 ## Upstream
 
-This project was forked from the [Substrate Node Template](https://github.com/substrate-developer-hub/substrate-node-template) and the same instructions for [building](https://github.com/substrate-developer-hub/substrate-node-template#build) and [running](https://github.com/substrate-developer-hub/substrate-node-template#run) apply.
+This project was forked from the [Substrate Node Template](https://github.com/substrate-developer-hub/substrate-node-template).
+
+## Build & Run
+
+To build the chain, execute the following commands from the project root:
+
+```
+$ ./scripts/init.sh && cargo build --release
+```
+
+To execute the chain, run:
+
+```
+$ ./target/release/substrate-evm --dev
+```
+
+A [`makefile`](/makefile) is provided in order to document and encapsulate commands such as these. In this case, the above commands are associated with the `build-chain` and `start-chain` `make` targets.
 
 ## Genesis Configuration
 
-The development [chain spec](https://github.com/danforbes/substrate-evm/blob/master/src/chain_spec.rs) included with this project defines a genesis block that has been pre-configured with an EVM account for [Alice](https://substrate.dev/docs/en/next/development/tools/subkey#well-known-keys). When [a development chain is started](https://github.com/substrate-developer-hub/substrate-node-template#run), Alice's EVM account ID is printed to the console (`EVM Account ID for Alice: 0x57d213d0927ccc7596044c6ba013dd05522aacba`). The [Polkadot UI](https://substrate.dev/docs/en/next/development/front-end/polkadot-js#polkadot-js-apps) can be used to see the details of Alice's EVM account. In order to view an EVM account, use the `Developer` tab of the Polkadot UI `Settings` app to define the EVM `Account` type:
-```
-{
-  ...
-  "Account": {
+The development [chain spec](/src/chain_spec.rs) included with this project defines a genesis block that has been pre-configured with an EVM account for [Alice](https://substrate.dev/docs/en/next/development/tools/subkey#well-known-keys). When [a development chain is started](https://github.com/substrate-developer-hub/substrate-node-template#run), Alice's EVM account will be funded with a large amount of Ether (`U256::MAX`). The [Polkadot UI](https://substrate.dev/docs/en/next/development/front-end/polkadot-js#polkadot-js-apps) can be used to see the details of Alice's EVM account. In order to view an EVM account, use the `Developer` tab of the Polkadot UI `Settings` app to define the EVM `Account` type:
+
+```json
+"Account": {
     "nonce": "U256",
     "balance": "U256"
   }
-  ...
-}
 ```
 
-Once this type has been defined, use the `Chain State` app's `Storage` tab to query `evm > accounts` with Alice's EVM account ID (`0x57d213d0927ccc7596044c6ba013dd05522aacba`); the returned value should be: `{"nonce":0,"balance":"0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}`.
+Use the `Chain State` app's `Storage` tab to query `evm > accounts` with Alice's EVM account ID (`0x57d213d0927ccc7596044c6ba013dd05522aacba`); the value that is returned should be: `{"nonce":0,"balance":"0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}`.
 
-## Contract Deployment & Usage
+> Further reading: [EVM accounts](https://github.com/danforbes/danforbes/blob/master/writings/eth-dev.md#Accounts)
 
-Define a simple smart contract and use a tool like [the Remix web IDE](https://remix.ethereum.org/) to determine its bytecode:
+Alice's EVM account ID was calculated using [a provided utility](/utils/README.md#--evm-address-address).
 
-Contract:
-```
-pragma solidity ^0.6.0;
+## Contract Deployment
 
-contract HelloEvm {
-    uint public num = 42;
-    
-    function setNum(uint _num) external {
-        num = _num;
-    }
-}
-```
+The [`truffle`](/truffle) directory contains a [Truffle](https://www.trufflesuite.com/truffle) project that defines [an ERC-20 token](/truffle/contracts/MyToken.sol). For convenience, this repository also contains [the compiled bytecode of this token contract](/truffle/build/contracts/MyToken.json#L259), which can be used to deploy it to the Substrate blockchain.
 
-Bytecode:
-```
-0x6080604052602a60005534801561001557600080fd5b5060c4806100246000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80634e70b1dc146037578063cd16ecbf146053575b600080fd5b603d607e565b6040518082815260200191505060405180910390f35b607c60048036036020811015606757600080fd5b81019080803590602001909291905050506084565b005b60005481565b806000819055505056fea2646970667358221220680058d8f10641b1dc0534843e3c071877d55adf9f39c4550a1358af8b13993464736f6c63430006000033
-```
+> Further reading: [the ERC-20 token standard](https://github.com/danforbes/danforbes/blob/master/writings/eth-dev.md#EIP-20-ERC-20-Token-Standard)
 
 Use the Polkadot UI `Extrinsics` app to deploy the contract from Alice's account (submit the extrinsic as a signed transaction) using `evm > create` with the following parameters:
+
 ```
 init: <contract bytecode>
 value: 0
@@ -52,17 +54,42 @@ gas_limit: 4294967295
 gas_price: 1
 ```
 
-Use the `Chain State` app to view Alice's [EVM account](https://github.com/danforbes/danforbes/blob/master/writings/eth-dev.md#Accounts) after submitting the extrinsic; notice that the account's `nonce` value has been incremented to `1` and its `balance` has decreased.
+The values for `gas_limit` and `gas_price` were chosen for convenience and have little inherent or special meaning.
 
-Since Ethereum smart contract account IDs are deterministic, and since both Alice's nonce (`0`) and EVM account ID (`0x57d213d0927ccc7596044c6ba013dd05522aacba`) were well-known at contract-creation time, [it is trivial to calculate the account ID of the newly-created contract](https://ethereum.stackexchange.com/a/46960): `0x11650d764feb44f78810ef08700c2284f7e81dcb`. Use the `Chain State` app to view the contract's account, then query `evm > accountCodes` for both Alice's and the contract's account IDs; notice that Alice's account code is empty and the contract's is equal to the bytecode of the Solidity smart contract. Finally, query `evm > accountStorages` to view the value of the element in the contract's first storage slot (use the contract's account ID for the `H160` parameter and `0x0000000000000000000000000000000000000000000000000000000000000000` for the `H256` parameter); the value that is returned should be `0x000000000000000000000000000000000000000000000000000000000000002a`, which is equal to the `uint` value `42`.
+While the extrinsic is processing, open the browser console and take note of the output. Once the extrinsic has finalized, the EVM pallet will fire a `Created` event with an `address` field that provides the address of the newly-created contract. In this case, however, it is trivial to [calculate this value](https://ethereum.stackexchange.com/a/46960): `0x11650d764feb44f78810ef08700c2284f7e81dcb`. That is because EVM contract account IDs are determined solely by the ID and nonce of the contract creator's account and, in this case, both of those values are well-known (`0x57d213d0927ccc7596044c6ba013dd05522aacba` and `0x0`, respectively).
 
-Now use the `Extrinsics` app to invoke `evm > call` and update the value of the element in the contract's first storage slot. Use a tool like Remix to calculate the value of the `input` parameter for whatever value you would like to update the storage element's value to; the provided `input` parameter will update it to `221`:
+Use the `Chain State` app to view the EVM accounts for Alice and the newly-created contract; notice that Alice's `nonce` has been incremented to `1` and her `balance` has decreased. Next, query `evm > accountCodes` for both Alice's and the contract's account IDs; notice that Alice's account code is empty and the contract's is equal to the bytecode of the Solidity contract.
+
+## Contract Storage
+
+The ERC-20 contract that was deployed inherits from [the OpenZeppelin ERC-20 implementation](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol) and extends its capabilities by adding [a constructor that mints a maximum amount of tokens to the contract creator](/truffle/contracts/MyToken.sol#L8). Use the `Chain State` app to query `evm > accountStorage` and view the value associated with Alice's account in the `_balances` map of the ERC-20 contract; use the ERC-20 contract address (`0x11650d764feb44f78810ef08700c2284f7e81dcb`) as the first parameter and the storage slot to read as the second parameter (`0xa7473b24b6fd8e15602cfb2f15c6a2e2770a692290d0c5097b77dd334132b7ce`). The value that is returned should be `0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff`.
+
+The storage slot was calculated using [a provided utility](/utils/README.md#--erc20-slot-slot-address).
+
+> Further reading: [EVM layout of state variables in storage](https://solidity.readthedocs.io/en/v0.6.2/miscellaneous.html#layout-of-state-variables-in-storage)
+
+## Contract Usage
+
+Use the `Extrinsics` app to invoke the `transfer(address, uint256)` function on the ERC-20 contract with `evm > call` and transfer some of the ERC-20 tokens from Alice to Bob.
+
 ```
 target: 0x11650d764feb44f78810ef08700c2284f7e81dcb
-input: 0xcd16ecbf00000000000000000000000000000000000000000000000000000000000000dd
+input: 0xa9059cbb0000000000000000000000008bc395119f39603402d0c85bc9eda5dfc5ae216000000000000000000000000000000000000000000000000000000000000000dd
 value: 0
 gas_limit: 4294967295
 gas_price: 1
 ```
 
-Use the `Chain State` app to view the updated value of the element in the contract's first storage slot as well as Alice's account, which should now have a `nonce` value of `2`.
+The value of the `input` parameter is an EVM ABI-encoded function call that was calculated using [the Remix web IDE](http://remix.ethereum.org); it consists of a function selector (`0xa9059cbb`) and the arguments to be used for the function invocation. In this case, the arguments correspond to Bob's EVM account ID (`0x8bc395119f39603402d0c85bc9eda5dfc5ae2160`) and the number of tokens to be transferred (`0xdd`, or 221 in hex).
+
+> Further reading: [the EVM ABI specification](https://solidity.readthedocs.io/en/v0.6.2/abi-spec.html)
+
+After the extrinsic has finalized, use the `Chain State` app to query `evm > accountStorage` to see the ERC-20 balances for both Alice and Bob.
+
+## Polkadot UI
+
+This project contains [a Polkadot UI](/ui) with some custom components for the EVM pallet.
+
+## Raspberry Pi
+
+See [the `rpi` directory](/rpi) for information about cross-compiling a Substrate node for execution on a Raspberry Pi.

@@ -126,7 +126,6 @@ fn testnet_genesis(initial_authorities: Vec<(AuraId, GrandpaId)>,
 	_enable_println: bool) -> GenesisConfig {
 	let alice_account_id = get_account_id_from_seed::<sr25519::Public>("Alice");
 	let alice_evm_account_id = HashTruncateConvertAccountId::<Blake2Hasher>::convert_account_id(&alice_account_id);
-	println!("EVM Account ID for Alice: {:?}", alice_evm_account_id);
 
 	GenesisConfig {
 		system: Some(SystemConfig {
