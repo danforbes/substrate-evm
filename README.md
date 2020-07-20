@@ -1,4 +1,10 @@
+[![Included in the Arctic Code Vault](https://img.shields.io/badge/Arctic%20Code%20Vault-blue)](https://archiveprogram.github.com/)
+
 # Substrate Node + EVM Pallet Template
+
+**This project has been archived.** Please refer to more up-to-date projects, such as
+[Parity's Frontier project](https://github.com/paritytech/frontier) and the fantastic work being
+done by the [Moonbeam Network](https://docs.moonbeam.network/).
 
 A [FRAME](https://substrate.dev/docs/en/next/conceptual/runtime/frame)-based
 [Substrate](https://substrate.dev/en/) node with the
