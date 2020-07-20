@@ -250,8 +250,8 @@ impl evm::Trait for Runtime {
 	type Currency = Balances;
 	type Event = Event;
 	type Precompiles = (); // We can use () here because paint_evm provides an
-												 // `impl Precompiles for ()``
-												 // block that always returns none (line 75)
+						   // `impl Precompiles for ()``
+						   // block that always returns none (line 75)
 }
 
 construct_runtime!(
